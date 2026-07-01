@@ -1,7 +1,5 @@
 import { z } from "zod";
 import { createDraft } from "../blogger/bloggerClient.js";
-import { renderImageHtml } from "../image/imageStorage.js";
-import { collectLatestScreenshots, storeImages } from "../image/localImageProvider.js";
 import { normalizeLabels, summarizePost, textResult, ToolRegistrar } from "./types.js";
 
 function bulletList(items?: string[]): string {
@@ -22,7 +20,7 @@ export const registerCreateProjectDevlogDraft: ToolRegistrar = (server) => {
     "create_project_devlog_draft",
     {
       title: "Create project devlog draft",
-      description: "Create a structured Blogger draft for a web/app project devlog with optional screenshots.",
+      description: "Create a structured Blogger draft for a web/app project devlog. Upload screenshots manually in Blogger.",
       inputSchema: {
         projectName: z.string().min(1),
         todayWork: z.array(z.string()).default([]),
@@ -31,25 +29,12 @@ export const registerCreateProjectDevlogDraft: ToolRegistrar = (server) => {
         solutions: z.array(z.string()).optional(),
         learnings: z.array(z.string()).optional(),
         nextTasks: z.array(z.string()).optional(),
-        projectDir: z.string().optional(),
-        screenshotDir: z.string().optional(),
-        screenshotPaths: z.array(z.string()).optional(),
-        imageUrls: z.array(z.string()).optional(),
         blogId: z.string().optional(),
         labels: z.array(z.string()).max(3).optional()
       }
     },
     async (input) => {
       const seo = seoFor(input.projectName, input.todayWork);
-      const autoScreenshots = await collectLatestScreenshots({
-        projectDir: input.projectDir,
-        screenshotDir: input.screenshotDir,
-        limit: 4
-      });
-      const imageResult = await storeImages({
-        imageUrls: input.imageUrls,
-        imagePaths: [...autoScreenshots, ...(input.screenshotPaths ?? [])]
-      });
 
       const markdown = `> ${seo.description}
 
@@ -63,7 +48,7 @@ ${bulletList(input.problems)}
 ${bulletList(input.solutions)}
 
 ## 4. 결과 화면
-${imageResult.images.length > 0 ? "아래 스크린샷으로 결과를 확인할 수 있습니다." : "스크린샷은 아직 첨부되지 않았습니다."}
+Blogger 편집기에서 스크린샷이나 결과 이미지를 직접 업로드해 추가합니다.
 
 ## 변경 파일
 ${bulletList(input.changedFiles)}
@@ -79,17 +64,13 @@ ${bulletList(input.nextTasks)}
         title: seo.title,
         markdown,
         labels: normalizeLabels(input.labels) ?? seo.labels,
-        blogId: input.blogId,
-        imageHtml: renderImageHtml(imageResult.images, { gallery: true })
+        blogId: input.blogId
       });
 
       return textResult({
         status: "draft_created",
         post: summarizePost(post),
-        seo,
-        autoScreenshots,
-        images: imageResult.images,
-        warnings: imageResult.warnings
+        seo
       });
     }
   );

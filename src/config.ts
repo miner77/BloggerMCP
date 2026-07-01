@@ -24,11 +24,6 @@ export const config = {
   googleRedirectUri: optionalEnv("GOOGLE_REDIRECT_URI") ?? "http://localhost:3000/oauth2callback",
   bloggerBlogId: optionalEnv("BLOGGER_BLOG_ID"),
   tokenDir: path.resolve(cwd, optionalEnv("TOKEN_DIR") ?? ".tokens"),
-  imageAssetDir: optionalEnv("BLOGGER_IMAGE_ASSET_DIR")
-    ? path.resolve(cwd, optionalEnv("BLOGGER_IMAGE_ASSET_DIR")!)
-    : undefined,
-  imagePublicBaseUrl: optionalEnv("BLOGGER_IMAGE_PUBLIC_BASE_URL"),
-  githubRawBaseUrl: optionalEnv("GITHUB_RAW_BASE_URL"),
   stravaClientId: optionalEnv("STRAVA_CLIENT_ID"),
   stravaClientSecret: optionalEnv("STRAVA_CLIENT_SECRET"),
   stravaRedirectUri: optionalEnv("STRAVA_REDIRECT_URI") ?? "http://localhost:3000/strava/callback"

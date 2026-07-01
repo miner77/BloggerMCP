@@ -1,7 +1,5 @@
 import { z } from "zod";
 import { updatePost } from "../blogger/bloggerClient.js";
-import { renderImageHtml } from "../image/imageStorage.js";
-import { storeImages } from "../image/localImageProvider.js";
 import { normalizeLabels, summarizePost, textResult, ToolRegistrar } from "./types.js";
 
 export const registerUpdateBloggerPost: ToolRegistrar = (server) => {
@@ -15,29 +13,21 @@ export const registerUpdateBloggerPost: ToolRegistrar = (server) => {
         blogId: z.string().optional(),
         title: z.string().optional(),
         markdown: z.string().optional(),
-        labels: z.array(z.string()).max(3).optional(),
-        imageUrls: z.array(z.string()).optional(),
-        imagePaths: z.array(z.string()).optional(),
-        altTexts: z.array(z.string()).optional(),
-        gallery: z.boolean().optional().default(true)
+        labels: z.array(z.string()).max(3).optional()
       }
     },
     async (input) => {
-      const imageResult = await storeImages(input);
       const post = await updatePost({
         postId: input.postId,
         title: input.title,
         markdown: input.markdown,
         labels: normalizeLabels(input.labels),
-        blogId: input.blogId,
-        imageHtml: renderImageHtml(imageResult.images, { gallery: input.gallery })
+        blogId: input.blogId
       });
 
       return textResult({
         status: "post_updated",
-        post: summarizePost(post),
-        images: imageResult.images,
-        warnings: imageResult.warnings
+        post: summarizePost(post)
       });
     }
   );

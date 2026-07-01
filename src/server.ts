@@ -9,7 +9,6 @@ import { registerListBloggerPosts } from "./tools/listBloggerPosts.js";
 import { registerPublishBloggerPost } from "./tools/publishBloggerPost.js";
 import { registerScoreBlogPost } from "./tools/scoreBlogPost.js";
 import { registerUpdateBloggerPost } from "./tools/updateBloggerPost.js";
-import { registerUploadPostImage } from "./tools/uploadPostImage.js";
 
 const server = new McpServer({
   name: "blogger-mcp",
@@ -22,7 +21,6 @@ registerListBloggerPosts(server);
 registerUpdateBloggerPost(server);
 registerPublishBloggerPost(server);
 registerScoreBlogPost(server);
-registerUploadPostImage(server);
 registerCreateProjectDevlogDraft(server);
 registerCreateStravaActivityDraft(server);
 

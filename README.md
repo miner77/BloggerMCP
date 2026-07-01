@@ -1,6 +1,6 @@
 # Blogger MCP
 
-TypeScript MCP server for Blogger drafts, post management, project devlogs with screenshots, and Strava running retrospectives.
+TypeScript MCP server for Blogger drafts, post management, project devlogs, and Strava running retrospectives.
 
 ## 한국어 안내
 
@@ -14,7 +14,6 @@ Blogger MCP는 Codex, Claude 같은 MCP 클라이언트에서 Blogger 글을 작
 - 명시적 게시
 - Google OAuth refresh token 로컬 저장
 - Markdown을 HTML로 변환해 Blogger 본문에 삽입
-- 이미지 URL 또는 로컬 이미지 경로를 글에 삽입
 - 프로젝트 개발일지 초안 생성
 - Strava 활동 데이터 기반 러닝 회고 초안 생성
 
@@ -48,7 +47,7 @@ npm run oauth:google
 ### Codex에 등록
 
 ```bash
-codex mcp add blogger -- /opt/homebrew/bin/npm --prefix /Users/powerofdeen/Documents/BloggerMCP run start
+codex mcp add blogger -- /opt/homebrew/bin/npm --prefix /absolute/path/to/BloggerMCP run start
 ```
 
 등록 확인:
@@ -76,7 +75,7 @@ macOS 기준 Claude Desktop 설정 파일:
       "command": "/opt/homebrew/bin/npm",
       "args": [
         "--prefix",
-        "/Users/powerofdeen/Documents/BloggerMCP",
+        "/absolute/path/to/BloggerMCP",
         "run",
         "start"
       ]
@@ -121,7 +120,6 @@ publish_blogger_post로 postId="POST_ID" confirmPublish=true 실행해줘
 - `update_blogger_post`: 기존 Blogger 글 수정
 - `publish_blogger_post`: 명시적 게시
 - `score_blog_post`: 글 구조와 SEO 기본 점수 확인
-- `upload_post_image`: 이미지 URL 또는 로컬 이미지 삽입 준비
 - `create_project_devlog_draft`: 프로젝트 개발일지 초안 생성
 - `create_strava_activity_draft`: Strava 활동 기반 러닝 회고 초안 생성
 
@@ -130,6 +128,7 @@ publish_blogger_post로 postId="POST_ID" confirmPublish=true 실행해줘
 - 기본은 항상 초안 생성입니다.
 - 게시하려면 `publish_blogger_post`를 명시적으로 호출해야 합니다.
 - `publish_blogger_post`에는 `confirmPublish: true`가 필요합니다.
+- 이미지는 Blogger 편집기에서 직접 업로드하는 흐름을 권장합니다.
 - `.env`, `.tokens`는 Git에 올리지 않습니다.
 - client secret, access token, refresh token은 로그나 응답에 출력하지 않습니다.
 
@@ -141,8 +140,6 @@ publish_blogger_post로 postId="POST_ID" confirmPublish=true 실행해줘
 - Publish only through `publish_blogger_post` with `confirmPublish: true`.
 - Store Google OAuth refresh tokens locally.
 - Convert Markdown input to Blogger HTML.
-- Insert image URLs or local images into post HTML.
-- Auto-detect latest screenshots from a `screenshots` directory.
 - Separate Strava OAuth/client module for running retrospective drafts.
 - No client secret, access token, or refresh token is logged or returned.
 
@@ -256,18 +253,9 @@ Inputs include:
 - `title`
 - `markdown`
 - `labels`
-- `imageUrls`
-- `imagePaths`
-- `altTexts`
 
-Local image paths require:
-
-```bash
-BLOGGER_IMAGE_ASSET_DIR=public/blogger-assets
-BLOGGER_IMAGE_PUBLIC_BASE_URL=https://your-site.example/blogger-assets
-```
-
-If image upload/copy fails, draft creation continues and warnings are returned.
+Local image upload is intentionally not part of the main workflow. Create the
+draft with MCP, then upload and place images in the Blogger editor.
 
 ### `list_blogger_posts`
 
@@ -275,7 +263,7 @@ Lists recent posts. Use `status: ["draft"]` for drafts only.
 
 ### `update_blogger_post`
 
-Patches title, content, labels, and optional images. It does not publish.
+Patches title, content, and labels. It does not publish.
 
 ### `publish_blogger_post`
 
@@ -290,16 +278,7 @@ Publishes a post only when called explicitly:
 
 ### `score_blog_post`
 
-Scores title length, heading structure, content depth, images, wrap-up, and SEO labels.
-
-### `upload_post_image`
-
-Prepares image URLs for post insertion. Supports:
-
-- `png`
-- `jpg`
-- `jpeg`
-- `webp`
+Scores title length, heading structure, content depth, wrap-up, and SEO labels.
 
 ### `create_project_devlog_draft`
 
@@ -312,8 +291,6 @@ Creates a structured devlog draft:
 5. 배운 점
 6. 다음 작업
 
-It can auto-load latest images from `screenshots` under `projectDir`, plus explicit `screenshotPaths`.
-
 ### `create_strava_activity_draft`
 
 Modes:
@@ -325,16 +302,18 @@ Modes:
 
 The running retrospective includes distance, time, average pace, average heart rate, elevation, activity name, date, and lap pace data when available.
 
-## Image Storage Design
+## Image Workflow
 
-Blogger API image upload support is limited, so image handling is separated behind `ImageStorage`.
+Blogger's web editor can upload images directly into Blogger/Google-hosted
+storage, but the Blogger API draft flow used by this MCP expects post content
+HTML and does not provide the same simple local-file upload path.
 
-Current adapters:
+Recommended workflow:
 
-- URL images: directly inserted as `<img src="...">`.
-- Local public assets: copy local files into `BLOGGER_IMAGE_ASSET_DIR`, then build URLs from `BLOGGER_IMAGE_PUBLIC_BASE_URL`.
-
-Future adapters can add Google Photos, Google Drive, S3, or another CDN without changing Blogger tools.
+1. Use MCP to create or update the text draft.
+2. Open the draft in Blogger.
+3. Upload screenshots or attached images with the Blogger editor.
+4. Review the final layout and publish manually or with `publish_blogger_post`.
 
 ## Safety Notes
 
