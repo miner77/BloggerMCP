@@ -46,6 +46,12 @@ npm run oauth:google
 
 ### Codex에 등록
 
+아래 `/absolute/path/to/BloggerMCP`는 **git clone으로 내려받은 BloggerMCP 폴더의 절대경로**로 바꿔야 합니다. 프로젝트 폴더 안에서 `pwd`를 실행하면 현재 절대경로를 확인할 수 있습니다.
+
+```bash
+pwd
+```
+
 ```bash
 codex mcp add blogger -- /opt/homebrew/bin/npm --prefix /absolute/path/to/BloggerMCP run start
 ```
@@ -67,6 +73,8 @@ macOS 기준 Claude Desktop 설정 파일:
 ```
 
 설정 예시:
+
+아래 `/absolute/path/to/BloggerMCP`는 **git clone으로 내려받은 BloggerMCP 폴더의 절대경로**입니다. 예를 들어 `pwd` 결과가 `/Users/me/dev/BloggerMCP`라면 그 값을 넣으면 됩니다.
 
 ```json
 {
@@ -207,6 +215,10 @@ The refresh token is stored under `.tokens/google.json`.
 The Strava token is stored under `.tokens/strava.json`.
 
 ## MCP Configuration
+
+In the examples below, replace `/absolute/path/to/BloggerMCP` with the absolute
+path of the local folder created by `git clone`. Run `pwd` inside the
+`BloggerMCP` directory to find it.
 
 Example:
 
