@@ -9,6 +9,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/server.ts",
+    "oauth:google": "tsx src/auth/googleOAuthCallbackServer.ts",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit"
   },

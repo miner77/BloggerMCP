@@ -49,6 +49,18 @@ STRAVA_REDIRECT_URI=http://localhost:3000/strava/callback
 
 First login:
 
+Recommended local callback flow:
+
+```bash
+npm run oauth:google
+```
+
+Then open the printed Google OAuth URL. After approval, the local
+`http://localhost:3000/oauth2callback` page stores the refresh token and shows a
+success message.
+
+Manual fallback:
+
 1. Call MCP tool `blogger_login` with no `code`.
 2. Open the returned `authUrl`.
 3. Copy the `code` query parameter from the redirect URL.
