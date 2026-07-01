@@ -2,6 +2,137 @@
 
 TypeScript MCP server for Blogger drafts, post management, project devlogs with screenshots, and Strava running retrospectives.
 
+## 한국어 안내
+
+Blogger MCP는 Codex, Claude 같은 MCP 클라이언트에서 Blogger 글을 작성하고 관리하기 위한 TypeScript 기반 MCP 서버입니다. 기본 동작은 항상 **초안 생성**이며, 실제 게시는 `publish_blogger_post`를 명시적으로 호출할 때만 실행됩니다.
+
+주요 기능:
+
+- Blogger 글 초안 생성
+- 최근 글/초안 목록 조회
+- 기존 글 수정
+- 명시적 게시
+- Google OAuth refresh token 로컬 저장
+- Markdown을 HTML로 변환해 Blogger 본문에 삽입
+- 이미지 URL 또는 로컬 이미지 경로를 글에 삽입
+- 프로젝트 개발일지 초안 생성
+- Strava 활동 데이터 기반 러닝 회고 초안 생성
+
+### 빠른 시작
+
+```bash
+git clone https://github.com/powerofdeen/BloggerMCP.git
+cd BloggerMCP
+npm install
+cp .env.example .env
+npm run build
+```
+
+`.env`에 Blogger용 Google OAuth 값과 블로그 ID를 입력합니다.
+
+```bash
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+GOOGLE_REDIRECT_URI=http://localhost:3000/oauth2callback
+BLOGGER_BLOG_ID=...
+```
+
+Google OAuth 로그인을 진행합니다.
+
+```bash
+npm run oauth:google
+```
+
+터미널에 출력된 Google 로그인 URL을 열고 승인하면, `http://localhost:3000/oauth2callback`에서 refresh token이 자동으로 저장됩니다. 토큰은 `.tokens/google.json`에 저장되며 Git에는 포함되지 않습니다.
+
+### Codex에 등록
+
+```bash
+codex mcp add blogger -- /opt/homebrew/bin/npm --prefix /Users/powerofdeen/Documents/BloggerMCP run start
+```
+
+등록 확인:
+
+```bash
+codex mcp list
+```
+
+Codex에서 `/mcp`를 입력해도 `blogger` 서버가 보이는지 확인할 수 있습니다.
+
+### Claude Desktop에 등록
+
+macOS 기준 Claude Desktop 설정 파일:
+
+```text
+~/Library/Application Support/Claude/claude_desktop_config.json
+```
+
+설정 예시:
+
+```json
+{
+  "mcpServers": {
+    "blogger": {
+      "command": "/opt/homebrew/bin/npm",
+      "args": [
+        "--prefix",
+        "/Users/powerofdeen/Documents/BloggerMCP",
+        "run",
+        "start"
+      ]
+    }
+  }
+}
+```
+
+저장 후 Claude Desktop을 완전히 종료했다가 다시 실행하면 됩니다.
+
+### 사용 예시
+
+초안 생성:
+
+```text
+create_blogger_draft로 제목은 "테스트 글", 본문은 "## 테스트\nBlogger MCP로 만든 첫 초안입니다."로 초안 만들어줘
+```
+
+최근 글/초안 조회:
+
+```text
+list_blogger_posts로 최근 글과 초안 보여줘
+```
+
+프로젝트 개발일지 초안 생성:
+
+```text
+create_project_devlog_draft로 프로젝트명 BloggerMCP, 오늘 작업 내용은 "Blogger MCP 서버 구현", "OAuth callback helper 추가"로 초안 만들어줘
+```
+
+게시:
+
+```text
+publish_blogger_post로 postId="POST_ID" confirmPublish=true 실행해줘
+```
+
+### 제공 도구
+
+- `blogger_login`: Google OAuth 로그인 URL 생성 또는 OAuth code 교환
+- `create_blogger_draft`: Markdown 기반 Blogger 초안 생성
+- `list_blogger_posts`: 최근 글/초안 목록 조회
+- `update_blogger_post`: 기존 Blogger 글 수정
+- `publish_blogger_post`: 명시적 게시
+- `score_blog_post`: 글 구조와 SEO 기본 점수 확인
+- `upload_post_image`: 이미지 URL 또는 로컬 이미지 삽입 준비
+- `create_project_devlog_draft`: 프로젝트 개발일지 초안 생성
+- `create_strava_activity_draft`: Strava 활동 기반 러닝 회고 초안 생성
+
+### 안전 원칙
+
+- 기본은 항상 초안 생성입니다.
+- 게시하려면 `publish_blogger_post`를 명시적으로 호출해야 합니다.
+- `publish_blogger_post`에는 `confirmPublish: true`가 필요합니다.
+- `.env`, `.tokens`는 Git에 올리지 않습니다.
+- client secret, access token, refresh token은 로그나 응답에 출력하지 않습니다.
+
 ## Features
 
 - Create Blogger posts as drafts by default.
