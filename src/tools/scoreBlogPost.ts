@@ -7,7 +7,7 @@ function scorePost(title: string, markdown: string, labels: string[] = []) {
   const hasImages = /!\[[^\]]*]\([^)]+\)|<img\s/i.test(markdown);
   const hasConclusion = /(다음|결론|마무리|배운 점|next)/i.test(markdown);
   const titleLengthOk = title.length >= 18 && title.length <= 70;
-  const tagCountOk = labels.length >= 3 && labels.length <= 8;
+  const tagCountOk = labels.length >= 1 && labels.length <= 3;
 
   const checks = [
     { name: "title_length", passed: titleLengthOk, points: 20 },
@@ -34,7 +34,7 @@ function scorePost(title: string, markdown: string, labels: string[] = []) {
         case "clear_wrap_up":
           return "배운 점이나 다음 작업을 마지막에 정리해 보세요.";
         default:
-          return "3~8개 정도의 SEO 태그를 지정해 보세요.";
+          return "라벨은 1~3개 정도로만 간결하게 지정해 보세요.";
       }
     });
 

@@ -10,7 +10,7 @@ import {
   listRecentActivities,
   StravaActivity
 } from "../strava/stravaClient.js";
-import { summarizePost, textResult, ToolRegistrar } from "./types.js";
+import { normalizeLabels, summarizePost, textResult, ToolRegistrar } from "./types.js";
 
 function renderActivityMarkdown(activity: StravaActivity): string {
   const distance = formatDistanceMeters(activity.distance);
@@ -61,7 +61,7 @@ export const registerCreateStravaActivityDraft: ToolRegistrar = (server) => {
         activityId: z.number().int().optional(),
         blogId: z.string().optional(),
         maxResults: z.number().int().min(1).max(30).optional().default(10),
-        labels: z.array(z.string()).optional()
+        labels: z.array(z.string()).max(3).optional()
       }
     },
     async (input) => {
@@ -100,7 +100,7 @@ export const registerCreateStravaActivityDraft: ToolRegistrar = (server) => {
       const post = await createDraft({
         title,
         markdown: renderActivityMarkdown(activity),
-        labels: input.labels ?? ["러닝", "Strava", "운동기록", "회고"],
+        labels: normalizeLabels(input.labels) ?? ["러닝", "Strava", "회고"],
         blogId: input.blogId
       });
 

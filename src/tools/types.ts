@@ -30,3 +30,11 @@ export function summarizePost(post: {
     updated: post.updated
   };
 }
+
+export function normalizeLabels(labels?: string[], maxLabels = 3): string[] | undefined {
+  if (!labels) return undefined;
+  const normalized = labels
+    .map((label) => label.trim())
+    .filter(Boolean);
+  return Array.from(new Set(normalized)).slice(0, maxLabels);
+}

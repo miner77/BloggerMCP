@@ -2,7 +2,7 @@ import { z } from "zod";
 import { updatePost } from "../blogger/bloggerClient.js";
 import { renderImageHtml } from "../image/imageStorage.js";
 import { storeImages } from "../image/localImageProvider.js";
-import { summarizePost, textResult, ToolRegistrar } from "./types.js";
+import { normalizeLabels, summarizePost, textResult, ToolRegistrar } from "./types.js";
 
 export const registerUpdateBloggerPost: ToolRegistrar = (server) => {
   server.registerTool(
@@ -15,7 +15,7 @@ export const registerUpdateBloggerPost: ToolRegistrar = (server) => {
         blogId: z.string().optional(),
         title: z.string().optional(),
         markdown: z.string().optional(),
-        labels: z.array(z.string()).optional(),
+        labels: z.array(z.string()).max(3).optional(),
         imageUrls: z.array(z.string()).optional(),
         imagePaths: z.array(z.string()).optional(),
         altTexts: z.array(z.string()).optional(),
@@ -28,7 +28,7 @@ export const registerUpdateBloggerPost: ToolRegistrar = (server) => {
         postId: input.postId,
         title: input.title,
         markdown: input.markdown,
-        labels: input.labels,
+        labels: normalizeLabels(input.labels),
         blogId: input.blogId,
         imageHtml: renderImageHtml(imageResult.images, { gallery: input.gallery })
       });

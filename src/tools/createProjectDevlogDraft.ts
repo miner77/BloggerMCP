@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createDraft } from "../blogger/bloggerClient.js";
 import { renderImageHtml } from "../image/imageStorage.js";
 import { collectLatestScreenshots, storeImages } from "../image/localImageProvider.js";
-import { summarizePost, textResult, ToolRegistrar } from "./types.js";
+import { normalizeLabels, summarizePost, textResult, ToolRegistrar } from "./types.js";
 
 function bulletList(items?: string[]): string {
   return items && items.length > 0 ? items.map((item) => `- ${item}`).join("\n") : "- 정리 예정";
@@ -13,7 +13,7 @@ function seoFor(projectName: string, workSummary: string[]) {
   return {
     title: `${projectName} 개발일지: ${topic}`,
     description: `${projectName} 프로젝트에서 진행한 작업, 문제 해결 과정, 결과 화면과 다음 작업을 정리한 개발일지입니다.`,
-    labels: Array.from(new Set(["개발일지", projectName, "프로젝트", "트러블슈팅", "회고"]))
+    labels: normalizeLabels(["개발일지", projectName, "프로젝트"])
   };
 }
 
@@ -36,7 +36,7 @@ export const registerCreateProjectDevlogDraft: ToolRegistrar = (server) => {
         screenshotPaths: z.array(z.string()).optional(),
         imageUrls: z.array(z.string()).optional(),
         blogId: z.string().optional(),
-        labels: z.array(z.string()).optional()
+        labels: z.array(z.string()).max(3).optional()
       }
     },
     async (input) => {
@@ -78,7 +78,7 @@ ${bulletList(input.nextTasks)}
       const post = await createDraft({
         title: seo.title,
         markdown,
-        labels: input.labels ?? seo.labels,
+        labels: normalizeLabels(input.labels) ?? seo.labels,
         blogId: input.blogId,
         imageHtml: renderImageHtml(imageResult.images, { gallery: true })
       });
