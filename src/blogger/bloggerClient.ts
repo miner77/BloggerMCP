@@ -393,7 +393,7 @@ export async function getCommentsByBlog(input: {
   fetchBodies?: boolean;
 }): Promise<blogger_v3.Schema$CommentList> {
   const blogger = await getBlogger();
-  const response = await blogger.comments.list({
+  const response = await blogger.comments.listByBlog({
     blogId: resolveBlogId(input.blogId),
     maxResults: input.maxResults ?? 10,
     fetchBodies: input.fetchBodies
