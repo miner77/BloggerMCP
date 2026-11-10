@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { blogger_v3 } from "googleapis";
-import { listComments, getCommentsByPost, getCommentsByBlog } from "../blogger/bloggerClient.js";
+import { getCommentsByPost, getCommentsByBlog } from "../blogger/bloggerClient.js";
 import { textResult, ToolRegistrar } from "./types.js";
 
 function summarizeComment(c: blogger_v3.Schema$Comment) {
@@ -39,7 +39,7 @@ export const registerListBloggerComments: ToolRegistrar = (server) => {
             maxResults: input.maxResults,
             fetchBodies: input.fetchBodies
           })
-        : await listComments({
+        : await getCommentsByBlog({
             blogId: input.blogId,
             maxResults: input.maxResults,
             fetchBodies: input.fetchBodies
