@@ -125,9 +125,30 @@ publish_blogger_post로 postId="POST_ID" confirmPublish=true 실행해줘
 - `blogger_login`: Google OAuth 로그인 URL 생성 또는 OAuth code 교환
 - `create_blogger_draft`: Markdown 기반 Blogger 초안 생성
 - `list_blogger_posts`: 최근 글/초안 목록 조회
+- `get_blogger_post`: 단일 글 조회
+- `delete_blogger_post`: 글 영구 삭제
+- `revert_blogger_post`: 게시된 글을 초안으로 되돌림
+- `search_blogger_posts`: 글 검색
 - `update_blogger_post`: 기존 Blogger 글 수정
 - `publish_blogger_post`: 명시적 게시
 - `score_blog_post`: 글 구조와 SEO 기본 점수 확인
+- `create_blogger_page`: Markdown 기반 Blogger 페이지 생성
+- `list_blogger_pages`: 페이지 목록 조회
+- `get_blogger_page`: 단일 페이지 조회
+- `delete_blogger_page`: 페이지 영구 삭제
+- `revert_blogger_page`: 게시된 페이지를 초안으로 되돌림
+- `update_blogger_page`: 기존 Blogger 페이지 수정
+- `publish_blogger_page`: 명시적 게시
+- `list_blogger_comments`: 댓글 목록 조회
+- `list_blogger_comments_by_blog`: 블로그별 댓글 목록 조회
+- `get_blogger_comment`: 단일 댓글 조회
+- `approve_blogger_comment`: 댓글 승인
+- `delete_blogger_comment`: 댓글 영구 삭제
+- `mark_blogger_comment_as_spam`: 댓글 스팸 처리
+- `get_blogger_blog`: 블로그 메타데이터 조회
+- `get_blogger_blog_by_url`: URL로 블로그 메타데이터 조회
+- `list_blogs_by_user`: 사용자별 블로그 목록 조회
+- `get_blogger_pageviews`: 페이지뷰 통계 조회
 - `create_project_devlog_draft`: 프로젝트 개발일지 초안 생성
 - `create_strava_activity_draft`: Strava 활동 기반 러닝 회고 초안 생성
 
@@ -144,8 +165,12 @@ publish_blogger_post로 postId="POST_ID" confirmPublish=true 실행해줘
 
 - Create Blogger posts as drafts by default.
 - List recent live posts and drafts.
-- Update existing posts without publishing.
-- Publish only through `publish_blogger_post` with `confirmPublish: true`.
+- Get, update, delete, revert, and search posts.
+- Create, list, get, update, delete, revert, and publish pages.
+- Publish only through `publish_blogger_post` / `publish_blogger_page` with `confirmPublish: true`.
+- List, get, approve, delete, and mark comments as spam.
+- Get blog metadata by ID, URL, or user.
+- Get pageview statistics.
 - Store Google OAuth refresh tokens locally.
 - Convert Markdown input to Blogger HTML.
 - Separate Strava OAuth/client module for running retrospective drafts.

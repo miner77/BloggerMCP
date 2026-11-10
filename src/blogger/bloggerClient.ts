@@ -22,6 +22,31 @@ export type BloggerUpdateInput = {
   blogId?: string;
 };
 
+export type BloggerPageInput = {
+  title: string;
+  markdown: string;
+  blogId?: string;
+};
+
+export type BloggerPageUpdateInput = {
+  pageId: string;
+  title?: string;
+  markdown?: string;
+  blogId?: string;
+};
+
+export type BloggerCommentInput = {
+  blogId?: string;
+  postId?: string;
+  maxResults?: number;
+  fetchBodies?: boolean;
+};
+
+export type BloggerPageviewsInput = {
+  blogId?: string;
+  range: string;
+};
+
 function resolveBlogId(blogId?: string): string {
   const resolved = blogId ?? config.bloggerBlogId;
   if (!resolved) {
@@ -39,6 +64,34 @@ async function getBlogger(): Promise<blogger_v3.Blogger> {
   const auth = await getGoogleAuthClient();
   return google.blogger({ version: "v3", auth });
 }
+
+/* ============================================================
+   BLOGS
+   ============================================================ */
+
+export async function getBlog(input: { blogId?: string }): Promise<blogger_v3.Schema$Blog> {
+  const blogger = await getBlogger();
+  const response = await blogger.blogs.get({ blogId: resolveBlogId(input.blogId) });
+  return response.data;
+}
+
+export async function getBlogByUrl(input: { url: string }): Promise<blogger_v3.Schema$Blog> {
+  const blogger = await getBlogger();
+  const response = await blogger.blogs.getByUrl({ url: input.url });
+  return response.data;
+}
+
+export async function listBlogsByUser(input: {
+  userId: string;
+}): Promise<blogger_v3.Schema$BlogList> {
+  const blogger = await getBlogger();
+  const response = await blogger.blogs.listByUser({ userId: input.userId });
+  return response.data;
+}
+
+/* ============================================================
+   POSTS
+   ============================================================ */
 
 export async function createDraft(input: BloggerPostInput): Promise<blogger_v3.Schema$Post> {
   const blogger = await getBlogger();
@@ -72,6 +125,60 @@ export async function listPosts(input: {
   return response.data;
 }
 
+export async function getPost(input: {
+  postId: string;
+  blogId?: string;
+  fetchBody?: boolean;
+}): Promise<blogger_v3.Schema$Post> {
+  const blogger = await getBlogger();
+  const response = await blogger.posts.get({
+    blogId: resolveBlogId(input.blogId),
+    postId: input.postId,
+    fetchBody: input.fetchBody
+  });
+
+  return response.data;
+}
+
+export async function deletePost(input: {
+  postId: string;
+  blogId?: string;
+}): Promise<void> {
+  const blogger = await getBlogger();
+  await blogger.posts.delete({
+    blogId: resolveBlogId(input.blogId),
+    postId: input.postId
+  });
+}
+
+export async function revertPost(input: {
+  postId: string;
+  blogId?: string;
+}): Promise<blogger_v3.Schema$Post> {
+  const blogger = await getBlogger();
+  const response = await blogger.posts.revert({
+    blogId: resolveBlogId(input.blogId),
+    postId: input.postId
+  });
+
+  return response.data;
+}
+
+export async function searchPosts(input: {
+  blogId?: string;
+  q: string;
+  fetchBodies?: boolean;
+}): Promise<blogger_v3.Schema$PostList> {
+  const blogger = await getBlogger();
+  const response = await blogger.posts.search({
+    blogId: resolveBlogId(input.blogId),
+    q: input.q,
+    fetchBodies: input.fetchBodies
+  });
+
+  return response.data;
+}
+
 export async function updatePost(input: BloggerUpdateInput): Promise<blogger_v3.Schema$Post> {
   const blogger = await getBlogger();
   const requestBody: blogger_v3.Schema$Post = {};
@@ -96,6 +203,214 @@ export async function publishPost(input: { postId: string; blogId?: string }): P
   const response = await blogger.posts.publish({
     blogId: resolveBlogId(input.blogId),
     postId: input.postId
+  });
+
+  return response.data;
+}
+
+/* ============================================================
+   PAGES
+   ============================================================ */
+
+export async function createPage(input: BloggerPageInput): Promise<blogger_v3.Schema$Page> {
+  const blogger = await getBlogger();
+  const response = await blogger.pages.insert({
+    blogId: resolveBlogId(input.blogId),
+    requestBody: {
+      title: input.title,
+      content: composeContent(input.markdown)
+    }
+  });
+
+  return response.data;
+}
+
+export async function listPages(input: {
+  blogId?: string;
+  maxResults?: number;
+}): Promise<blogger_v3.Schema$PageList> {
+  const blogger = await getBlogger();
+  const response = await blogger.pages.list({
+    blogId: resolveBlogId(input.blogId),
+    maxResults: input.maxResults ?? 10,
+    fetchBodies: false
+  });
+
+  return response.data;
+}
+
+export async function getPage(input: {
+  pageId: string;
+  blogId?: string;
+}): Promise<blogger_v3.Schema$Page> {
+  const blogger = await getBlogger();
+  const response = await blogger.pages.get({
+    blogId: resolveBlogId(input.blogId),
+    pageId: input.pageId
+  });
+
+  return response.data;
+}
+
+export async function deletePage(input: {
+  pageId: string;
+  blogId?: string;
+}): Promise<void> {
+  const blogger = await getBlogger();
+  await blogger.pages.delete({
+    blogId: resolveBlogId(input.blogId),
+    pageId: input.pageId
+  });
+}
+
+export async function revertPage(input: {
+  pageId: string;
+  blogId?: string;
+}): Promise<blogger_v3.Schema$Page> {
+  const blogger = await getBlogger();
+  const response = await blogger.pages.revert({
+    blogId: resolveBlogId(input.blogId),
+    pageId: input.pageId
+  });
+
+  return response.data;
+}
+
+export async function updatePage(input: BloggerPageUpdateInput): Promise<blogger_v3.Schema$Page> {
+  const blogger = await getBlogger();
+  const requestBody: blogger_v3.Schema$Page = {};
+
+  if (input.title) requestBody.title = input.title;
+  if (input.markdown !== undefined) {
+    requestBody.content = composeContent(input.markdown);
+  }
+
+  const response = await blogger.pages.update({
+    blogId: resolveBlogId(input.blogId),
+    pageId: input.pageId,
+    requestBody
+  });
+
+  return response.data;
+}
+
+export async function publishPage(input: { pageId: string; blogId?: string }): Promise<blogger_v3.Schema$Page> {
+  const blogger = await getBlogger();
+  const response = await blogger.pages.publish({
+    blogId: resolveBlogId(input.blogId),
+    pageId: input.pageId
+  });
+
+  return response.data;
+}
+
+/* ============================================================
+   COMMENTS
+   ============================================================ */
+
+export async function listComments(input: BloggerCommentInput): Promise<blogger_v3.Schema$CommentList> {
+  const blogger = await getBlogger();
+  const response = await blogger.comments.list({
+    blogId: resolveBlogId(input.blogId),
+    postId: input.postId,
+    maxResults: input.maxResults ?? 10,
+    fetchBodies: input.fetchBodies
+  });
+
+  return response.data;
+}
+
+export async function getComment(input: {
+  commentId: string;
+  blogId?: string;
+}): Promise<blogger_v3.Schema$Comment> {
+  const blogger = await getBlogger();
+  const response = await blogger.comments.get({
+    blogId: resolveBlogId(input.blogId),
+    commentId: input.commentId
+  });
+
+  return response.data;
+}
+
+export async function approveComment(input: {
+  commentId: string;
+  blogId?: string;
+}): Promise<blogger_v3.Schema$Comment> {
+  const blogger = await getBlogger();
+  const response = await blogger.comments.approve({
+    blogId: resolveBlogId(input.blogId),
+    commentId: input.commentId
+  });
+
+  return response.data;
+}
+
+export async function deleteComment(input: {
+  commentId: string;
+  blogId?: string;
+}): Promise<void> {
+  const blogger = await getBlogger();
+  await blogger.comments.delete({
+    blogId: resolveBlogId(input.blogId),
+    commentId: input.commentId
+  });
+}
+
+export async function markCommentAsSpam(input: {
+  commentId: string;
+  blogId?: string;
+}): Promise<blogger_v3.Schema$Comment> {
+  const blogger = await getBlogger();
+  const response = await blogger.comments.markAsSpam({
+    blogId: resolveBlogId(input.blogId),
+    commentId: input.commentId
+  });
+
+  return response.data;
+}
+
+export async function getCommentsByPost(input: {
+  postId: string;
+  blogId?: string;
+  maxResults?: number;
+  fetchBodies?: boolean;
+}): Promise<blogger_v3.Schema$CommentList> {
+  const blogger = await getBlogger();
+  const response = await blogger.comments.list({
+    blogId: resolveBlogId(input.blogId),
+    postId: input.postId,
+    maxResults: input.maxResults ?? 10,
+    fetchBodies: input.fetchBodies
+  });
+
+  return response.data;
+}
+
+export async function getCommentsByBlog(input: {
+  blogId?: string;
+  maxResults?: number;
+  fetchBodies?: boolean;
+}): Promise<blogger_v3.Schema$CommentList> {
+  const blogger = await getBlogger();
+  const response = await blogger.comments.list({
+    blogId: resolveBlogId(input.blogId),
+    maxResults: input.maxResults ?? 10,
+    fetchBodies: input.fetchBodies
+  });
+
+  return response.data;
+}
+
+/* ============================================================
+   PAGEVIEWS
+   ============================================================ */
+
+export async function getPageviews(input: BloggerPageviewsInput): Promise<blogger_v3.Schema$Pageviews> {
+  const blogger = await getBlogger();
+  const response = await blogger.pageViews.get({
+    blogId: resolveBlogId(input.blogId),
+    range: [input.range]
   });
 
   return response.data;

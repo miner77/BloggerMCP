@@ -1,7 +1,7 @@
 {
   "name": "blogger-mcp",
-  "version": "0.1.0",
-  "description": "MCP server for Blogger drafts, images, project devlogs, and Strava running retrospectives.",
+  "version": "0.2.0",
+  "description": "MCP server for Blogger drafts, pages, posts, comments, pageviews, project devlogs, and Strava running retrospectives.",
   "type": "module",
   "bin": {
     "blogger-mcp": "dist/server.js"
